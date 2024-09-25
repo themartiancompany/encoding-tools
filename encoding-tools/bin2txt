@@ -1,0 +1,241 @@
+#!/usr/bin/env bash
+#
+# SPDX-License-Identifier: AGPL-3.0
+
+_bin="$( \
+  dirname \
+    "$( \
+      command \
+        -v \
+	  "env")")"
+_lib="${_bin}/../lib"
+_share="${_bin}/../share"
+source \
+  "${_lib}/libcrash-bash/crash-bash"
+
+# Check all required programs
+# are available
+_requirements() {
+  _check_cmd \
+    "base64" \
+    "coreutils"
+}
+
+# shellcheck disable=SC2034
+_global_variables() {
+  make_date=""
+  out_txt=""
+  in_file=""
+  encoding_format=""
+  string_length=""
+  color=""
+  quiet=""
+}
+
+_chunk_split() {
+  local \
+    _in="${1}" \
+    _length="${2}" \
+    _prefix="${3}" \
+    _chunks \
+    _chunk \
+    _total \
+    _head \
+    _content \
+    _cut \
+    _out
+  _total="${#_in}"
+  _chunks="$(( \
+    ${_total} / ${_length} + 1))"
+  if (( "${_chunks}" < 2 )); then
+    _out="${_prefix}"
+    echo \
+      "${_in}" > \
+      "${_out}"
+    return \
+      0
+  fi
+  _msg_info \
+    "chunking ${_total} letters into '${_chunks}'"
+  for _chunk \
+    in $(seq \
+           "$(( ${_chunks}))"); do
+    _chunk_start="$(( \
+      _chunk * _length - _length ))"
+    _cut="${_in:${_chunk_start}:${_length}}"
+    _out="${_prefix}.${_chunk}"
+    _msg_info \
+      "Writing chunk ${_chunk} '${_out}' of length ${#_cut} out of ${_chunks}"
+    echo \
+      "${_cut}" > \
+      "${_out}"
+  done
+  _msg_info \
+    "finished"
+}
+
+_bin2txt() {
+  local \
+    _in="${1}" \
+    _out="${2}" \
+    _format="${3}" \
+    _length="${4}" \
+    _txt
+  if [[ "${_format}" == "base64" ]]; then
+    _txt="$( \
+      base64 \
+        "${_in}")"
+    _msg_info \
+      "encoded length: ${#_txt}"
+    _chunk_split \
+      "${_txt}" \
+      "${_length}" \
+      "${_out}"
+  fi
+}
+
+# Set defaults and, if present, overrides
+# from arch-grub command line option parameters
+_set_overrides() {
+  _set_override \
+    "make" \
+    "date" \
+    "$(_get_date_human)"
+  _set_override \
+    "encoding" \
+    "format" \
+    "base64"
+  _set_override \
+    "in" \
+    "file" \
+    ""
+  _set_override \
+    "out" \
+    "txt" \
+    ""
+  _set_override \
+    "string" \
+    "length" \
+    "10000"
+  if [[ -v override_color ]]; then
+    color="${override_color}"
+  elif [[ -z "${color}" ]]; then
+    color="n"
+  fi
+  if [[ -v override_quiet ]]; then
+    quiet="${override_quiet}"
+  elif [[ -z "${quiet}" ]]; then
+    quiet="y"
+  fi
+}
+
+# Shows configuration options.
+_show_config() {
+  _msg_info "${app_name} configuration"
+  _msg_info "                Make date:   $(_get "make" "date")"
+  _msg_info "          Encoding format:   $(_get "encoding" "format")"
+  _msg_info "      Chunk string length:   $(_get "string" "length")"
+  _msg_info "                  In file:   $(_get "in" "file")"
+  _msg_info "            Out text file:   $(_get "out" "txt")"
+}
+
+# Show help usage, with an exit status.
+# $1: exit status number.
+_usage() {
+  local \
+    _usage_text
+  IFS='' \
+    read \
+      -r \
+      -d '' \
+      _usage_text << \
+        ENDUSAGETEXT || true
+
+Converts binary to ascii text.
+
+Usage:
+  $(_get "app" "name")
+    [options]
+    <in_file>
+    <out_txt>
+  options:
+     -f <encoding_format> Encoding format ('base64').
+                          Default: '$(_get "encoding" "format")'
+     -L <string_length>   String chunk length.
+                          Default: '$(_get "string" "length")'
+
+     -h                   This message.
+     -v                   Enable verbose output
+ENDUSAGETEXT
+  _printf \
+    '%s\n' \
+    "${_usage_text}"
+  exit \
+    "${1}"
+}
+
+_globals
+_global_variables
+_requirements
+# shellcheck disable=SC2004
+# shellcheck disable=SC2034
+while \
+  getopts \
+    'f:L:cvh?' \
+    arg; do
+  case \
+    "${arg}" in
+    f) override_encoding_format="${OPTARG}" ;;
+    L) override_string_length="${OPTARG}" ;;
+    c) override_color="y" ;;
+    v) override_quiet="n" ;;
+    h|?) _set_overrides && \
+	 _usage \
+           0 ;;
+    *)
+    _msg_error \
+      "Invalid argument '${arg}'" \
+      0 && \
+    _set_overrides && \
+    _usage \
+      1
+    ;;
+  esac
+done
+shift \
+  $(( \
+    OPTIND - 1 \
+  ))
+(( $# < 2 )) && \
+  _msg_error \
+    "missing arguments" \
+    0 && \
+  _set_overrides && \
+  _usage \
+    1
+_set \
+  "in" \
+  "file" \
+  "${1}"
+_set \
+  "out" \
+  "txt" \
+  "${2}"
+_set_overrides
+_show_config
+app_opts=(
+  "$(_get \
+       "in" \
+       "file")"
+  "$(_get \
+       "out" \
+       "txt")"
+  "$(_get \
+       "encoding" \
+       "format")"
+    "$(_get \
+       "string" \
+       "length")"
+)
+_bin2txt \
+  "${app_opts[@]}"

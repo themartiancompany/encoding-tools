@@ -1,0 +1,241 @@
+#!/usr/bin/env bash
+#
+# SPDX-License-Identifier: AGPL-3.0
+
+_bin="$( \
+  dirname \
+    "$( \
+      command \
+        -v \
+	  "env")")"
+_lib="${_bin}/../lib"
+_share="${_bin}/../share"
+source \
+  "${_lib}/libcrash-bash/crash-bash"
+
+# Check all required programs
+# are available
+_requirements() {
+  _check_cmd \
+    "base64" \
+    "coreutils"
+  _check_cmd \
+    "cat" \
+    "coreutils"
+}
+
+# shellcheck disable=SC2034
+_global_variables() {
+  make_date=""
+  out_file=""
+  encoding_format=""
+  in_texts=()
+  color=""
+  quiet=""
+}
+
+_assemble() {
+  local \
+    _out="${1}" \
+    _in=() \
+    _file \
+    _data
+  shift \
+    1
+  _in+=(
+    "$@"
+  )
+  _msg_info \
+    "merging '${_in[@]}' into '${_out}'"
+  for _file \
+    in "${_in[@]}"; do
+    _data="$( \
+      cat \
+        "${_file}")"
+    echo \
+      -n \
+      "${_data}" >> \
+      "${_out}"
+  done
+  _msg_info \
+    "finished"
+}
+
+_base64_decode() {
+  local \
+    _out="${1}" \
+    _in=() \
+    _file \
+    _data \
+    _txt
+  shift \
+    1
+  _in+=(
+    "$@"
+  )
+  _txt="${_in}"
+  if (( 1 < "${_in[@]}" )); then
+    _txt="$( \
+      mktemp \
+        --suffix=".base64")"
+    _assemble \
+      "${_txt}" \
+      "${_in[@]}"
+  fi
+  base64 \
+   -d \
+   "${_txt}" > \
+   "${_out}"
+  if [[ "${_txt}" != "${_in}" ]]; then
+    rm \
+      "${_txt}"
+  fi
+  _msg_info \
+    "finished"
+
+}
+
+_txt2bin() {
+  local \
+    _out="${1}" \
+    _format="${2}" \
+    _in=()
+  shift \
+    2
+  _in+=(
+    "$@"
+  )
+  "_${_format}_decode" \
+    "${_out}" \
+    "${_in[@]}"
+}
+
+# Set defaults and, if present, overrides
+# from arch-grub command line option parameters
+_set_overrides() {
+  _set_override \
+    "make" \
+    "date" \
+    "$(_get_date_human)"
+  _set_override \
+    "encoding" \
+    "format" \
+    "base64"
+  _set_override \
+    "out" \
+    "file" \
+    ""
+  if [[ -v override_color ]]; then
+    color="${override_color}"
+  elif [[ -z "${color}" ]]; then
+    color="n"
+  fi
+  if [[ -v override_quiet ]]; then
+    quiet="${override_quiet}"
+  elif [[ -z "${quiet}" ]]; then
+    quiet="y"
+  fi
+}
+
+# Shows configuration options.
+_show_config() {
+  _msg_info "${app_name} configuration"
+  _msg_info "                Make date:   $(_get "make" "date")"
+  _msg_info "          Encoding format:   $(_get "encoding" "format")"
+  _msg_info "                 Out file:   $(_get "out" "file")"
+  _msg_info "       Input text file(s):   $(_get "in" "texts")"
+}
+
+# Show help usage, with an exit status.
+# $1: exit status number.
+_usage() {
+  local \
+    _usage_text
+  IFS='' \
+    read \
+      -r \
+      -d '' \
+      _usage_text << \
+        ENDUSAGETEXT || true
+
+Converts text to picture.
+
+Usage:
+  $(_get "app" "name")
+    [options]
+    <out_file>
+    [in_text]
+  options:
+     -f <encoding_format> Encoding format ('base64').
+                          Default: '$(_get "encoding" "format")'
+
+     -h                   This message.
+     -v                   Enable verbose output
+ENDUSAGETEXT
+  _printf \
+    '%s\n' \
+    "${_usage_text}"
+  exit \
+    "${1}"
+}
+
+_globals
+_global_variables
+_requirements
+# shellcheck disable=SC2004
+# shellcheck disable=SC2034
+while \
+  getopts \
+    'f:cvh?' \
+    arg; do
+  case \
+    "${arg}" in
+    f) override_encoding_format="${OPTARG}" ;;
+    c) override_color="y" ;;
+    v) override_quiet="n" ;;
+    h|?) _set_overrides && \
+	 _usage \
+           0 ;;
+    *)
+    _msg_error \
+      "Invalid argument '${arg}'" \
+      0 && \
+    _set_overrides && \
+    _usage \
+      1
+    ;;
+  esac
+done
+shift \
+  $(( \
+    OPTIND - 1 \
+  ))
+(( $# < 2 )) && \
+  _msg_error \
+    "missing arguments" \
+    0 && \
+  _set_overrides && \
+  _usage \
+    1
+_set \
+  "out" \
+  "file" \
+  "${1}"
+shift \
+  1
+in_texts+=(
+  "$@"
+)
+_set_overrides
+_show_config
+app_opts=(
+  "$(_get \
+       "out" \
+       "file")"
+  "$(_get \
+       "encoding" \
+       "format")"
+  "${in_texts[@]}"
+)
+_txt2bin \
+  "${app_opts[@]}"
