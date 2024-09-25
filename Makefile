@@ -16,21 +16,16 @@ check: shellcheck
 shellcheck:
 	shellcheck -s bash $(SCRIPT_FILES)
 
-install: install-media install-configs install-doc
+install: install-scripts install-doc
 
 install-doc:
 
 	install -vDm 644 $(DOC_FILES) -t $(DOC_DIR)
 
-install-media:
+install-scripts:
 
 	install -vdm 755 "$(BIN_DIR)"
 	install -vDm 755 $(_PROJECT)/bin2txt "$(BIN_DIR)"
 	install -vDm 755 $(_PROJECT)/txt2bin "$(BIN_DIR)"
 
-install-configs:
-
-	install -vdm 755 "$(DATA_DIR)/configs"
-	install -vDm 755 configs/ffmpeg_options "$(DATA_DIR)/configs"
-
-.PHONY: check install install-configs install-doc install-media shellcheck
+.PHONY: check install install-doc install-scripts shellcheck
