@@ -46,7 +46,7 @@ _assemble() {
     "$@"
   )
   _msg_info \
-    "merging '${_in[@]}' into '${_out}'"
+    "merging '${_in[*]}' into '${_out}'"
   for _file \
     in "${_in[@]}"; do
     _data="$( \
@@ -58,7 +58,7 @@ _assemble() {
       "${_out}"
   done
   _msg_info \
-    "finished"
+    "merging finished"
 }
 
 _base64_decode() {
@@ -74,7 +74,7 @@ _base64_decode() {
     "$@"
   )
   _txt="${_in}"
-  if (( 1 < "${_in[@]}" )); then
+  if (( 1 < "${#_in[@]}" )); then
     _txt="$( \
       mktemp \
         --suffix=".base64")"
@@ -82,6 +82,8 @@ _base64_decode() {
       "${_txt}" \
       "${_in[@]}"
   fi
+  _msg_info \
+    "decoding ${_txt} into ${_out}"
   base64 \
    -d \
    "${_txt}" > \
@@ -91,7 +93,7 @@ _base64_decode() {
       "${_txt}"
   fi
   _msg_info \
-    "finished"
+    "decoding finished"
 
 }
 
