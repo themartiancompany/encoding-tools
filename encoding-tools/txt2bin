@@ -57,9 +57,9 @@ _assemble() {
       <( cat \
            "${_file}") || \
       true
-    echo \
-      -n \
-      "${_data}" >> \
+    printf \
+      "%s" \
+      "${_data}" >>
       "${_out}"
   done
   _msg_info \

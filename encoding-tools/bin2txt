@@ -49,8 +49,8 @@ _chunk_split() {
     ${_total} / ${_length} + 1))"
   if (( "${_chunks}" < 2 )); then
     _out="${_prefix}"
-    echo \
-      -n \
+    printf \
+      "%s" \
       "${_in}" > \
       "${_out}"
     return \
@@ -67,8 +67,8 @@ _chunk_split() {
     _out="${_prefix}.${_chunk}"
     _msg_info \
       "Writing chunk ${_chunk} '${_out}' of length ${#_cut} out of ${_chunks}"
-    echo \
-      -n \
+    printf \
+      "%s" \
       "${_cut}" > \
       "${_out}"
   done
