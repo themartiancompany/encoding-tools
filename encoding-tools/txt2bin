@@ -49,9 +49,14 @@ _assemble() {
     "merging '${_in[*]}' into '${_out}'"
   for _file \
     in "${_in[@]}"; do
-    _data="$( \
-      cat \
-        "${_file}")"
+    IFS= \
+    read \
+      -rd \
+        '' \
+      _data < \
+      <( cat \
+           "${_file}") || \
+      true
     echo \
       -n \
       "${_data}" >> \
