@@ -59,7 +59,7 @@ _assemble() {
       true
     printf \
       "%s" \
-      "${_data}" >>
+      "${_data}" >> \
       "${_out}"
   done
   _msg_info \

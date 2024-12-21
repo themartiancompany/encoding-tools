@@ -88,8 +88,8 @@ _bin2txt() {
       -rd \
         '' \
       _txt < \
-      <( base64 \
-           "${_in}") || \
+      <(base64 \
+          "${_in}") || \
       true
     _msg_info \
       "encoded length: ${#_txt}"
