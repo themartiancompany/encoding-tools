@@ -84,9 +84,13 @@ _bin2txt() {
     _length="${4}" \
     _txt
   if [[ "${_format}" == "base64" ]]; then
-    _txt="$( \
-      base64 \
-        "${_in}")"
+    read \
+      -rd \
+        '' \
+      _txt < \
+      <( base64 \
+           "${_in}") || \
+      true
     _msg_info \
       "encoded length: ${#_txt}"
     _chunk_split \
