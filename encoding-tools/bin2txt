@@ -156,12 +156,12 @@ _set_overrides() {
 # Shows configuration options.
 _show_config() {
   _msg_info "${app_name} configuration"
-  _msg_info "                Make date:   $(_get "make" "date")"
-  _msg_info "          Encoding format:   $(_get "encoding" "format")"
-  _msg_info "      Chunk string length:   $(_get "string" "length")"
-  _msg_info "       Chunks amount only:   $(_get "amount" "only")"
-  _msg_info "                  In file:   $(_get "in" "file")"
-  _msg_info "            Out text file:   $(_get "out" "txt")"
+  _msg_info "                Make date:   ${make_date}"
+  _msg_info "          Encoding format:   ${encoding_format}"
+  _msg_info "      Chunk string length:   ${string_length}"
+  _msg_info "       Chunks amount only:   ${amount_only}"
+  _msg_info "                  In file:   ${in_file}"
+  _msg_info "            Out text file:   ${out_txt}"
 }
 
 # Show help usage, with an exit status.
@@ -185,11 +185,11 @@ Usage:
     <out_txt>
   options:
      -f <encoding_format> Encoding format ('base64').
-                          Default: '$(_get "encoding" "format")'
+                          Default: '${encoding_format}'
      -L <string_length>   String chunk length.
-                          Default: '$(_get "string" "length")'
+			  Default: '${string_length}'
      -s                   Only print chunks amount.
-                          Default: '$(_get "amount" "only")'
+                          Default: '${amount_only}'
 
 
      -h                   This message.
@@ -258,21 +258,11 @@ if (( 1 < $# )); then
 fi
 _show_config
 app_opts=(
-  "$(_get \
-       "in" \
-       "file")"
-  "$(_get \
-       "out" \
-       "txt")"
-  "$(_get \
-       "encoding" \
-       "format")"
-  "$(_get \
-       "string" \
-       "length")"
-  "$(_get \
-       "amount" \
-       "only")"
+  "${in_file}"
+  "${out_txt}"
+  "${encoding_format}"
+  "${string_length}"
+  "${amount_only}"
 )
 _bin2txt \
   "${app_opts[@]}"
