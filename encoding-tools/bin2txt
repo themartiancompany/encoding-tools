@@ -157,7 +157,9 @@ _buffer_prepare() {
   _in_size_bytes="$( \
     du \
       -bs \
-      "${_in}")"
+      "${_in}" | \
+      awk \
+        '{print $1}')"
   _msg=(
     "File '${_in}' has size"
     "'${_in_size_bytes}' bytes."
@@ -168,7 +170,8 @@ _buffer_prepare() {
     _in_size_bytes / _buffer_size_bytes + 1))"
   split \
     -n \
-      "${_blocks_total}" \
+      "l/${_blocks_total}" \
+    --numeric-suffixes="1" \
     "${_in}" \
     "${_out}.block."
   _blocks_find \
@@ -189,7 +192,7 @@ _base64_encode() {
         "${_block}") || \
     true
   _msg=(
-    "Block '${_block} encoded,"
+    "Block '${_block}' encoded,"
     "length: ${#_txt}."
   )
   _msg_info \
@@ -197,7 +200,6 @@ _base64_encode() {
   if [[ "${_amount_only}" == "n" ]]; then
     _chunk_split \
       "${_txt}" \
-      "${_chunk}" \
       "${_length}" \
       "${_out}"
   elif [[ "${_amount_only}" == "y" ]]; then
@@ -248,6 +250,9 @@ _bin2txt() {
   _block_current="$(( \
     _block_current + 1))"
   done
+  rm \
+    -rf \
+    "${_blocks[@]}"
   if [[ "${_amount_only}" == "y" ]]; then
     echo \
       "${_txt_chunks_total}"
@@ -309,7 +314,7 @@ _show_config() {
   _msg_info "${app_name} configuration"
   _msg_info "                Make date:   ${make_date}"
   _msg_info "          Encoding format:   ${encoding_format}"
-  _msg_info "               Block size:   ${block_size}"
+  _msg_info "              Buffer size:   ${buffer_size}"
   _msg_info "      Chunk string length:   ${string_length}"
   _msg_info "       Chunks amount only:   ${amount_only}"
   _msg_info "                  In file:   ${in_file}"
