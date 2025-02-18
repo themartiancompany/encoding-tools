@@ -2,6 +2,26 @@
 #
 # SPDX-License-Identifier: AGPL-3.0
 
+#    ----------------------------------------------------------------------
+#    Copyright © 2024, 2025  Pellegrino Prevete
+#
+#    All rights reserved
+#    ----------------------------------------------------------------------
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
 _bin="$( \
   dirname \
     "$( \
@@ -27,6 +47,7 @@ _global_variables() {
   out_txt=""
   in_file=""
   encoding_format=""
+  buffer_size=""
   string_length=""
   amount_only=""
   color=""
@@ -82,36 +103,156 @@ _chunk_split() {
     "finished"
 }
 
+_blocks_find() {
+  local \
+    _pattern="${1}" \
+    _pkgname=() \
+    _find_opts=()
+  shift \
+    1
+  _msg=(
+    "Looking for blocks with pattern"
+    "'${_pattern}'."
+  )
+  _msg_info \
+    "${_msg[*]}"
+  _find_opts+=(
+    -type
+      "f"
+    -print0
+  )
+  _msg=(
+    "running find with options"
+    "'${_find_opts[@]}'"
+  )
+  _msg_info \
+    "${_msg[*]}"
+  mapfile \
+    -d \
+    $'\0' \
+    _blocks < \
+    <(find \
+        "${_pattern}"* \
+        "${_find_opts[@]}" 2>/dev/null || \
+      true)
+}
+
+_buffer_prepare() {
+  local \
+    _in="${1}" \
+    _out="${2}" \
+    _buffer_size_bytes="${3}" \
+    _blocks_total \
+    _in_size_bytes \
+    _split_opts=() \
+    _msg=()
+  _in_size_bytes="$( \
+    du \
+      -bs \
+      "${_in}")"
+  _msg=(
+    "File '${_in}' has size"
+    "'${_in_size_bytes}' bytes."
+  )
+  _msg_info \
+    "${_msg[*]}"
+  _blocks_total="$(( \
+    _in_size_bytes / _buffer_size_bytes + 1))"
+  split \
+    -n \
+      "${_blocks_total}" \
+    "${_in}" \
+    "${_out}.block."
+  _blocks_find \
+    "${_out}.block"
+}
+
+_base64_encode() {
+  read \
+    -rd \
+      '' \
+    _txt < \
+    <(base64 \
+        "${_block}") || \
+    true
+  _msg=(
+    "Block '${_block} encoded"
+    "length: ${#_txt}."
+  )
+  _msg_info \
+    "${_msg[*]}"
+  if [[ "${_amount_only}" == "n" ]]; then
+    _chunk_split \
+      "${_txt}" \
+      "${_length}" \
+      "${_out}"
+  elif [[ "${_amount_only}" == "y" ]]; then
+    _total_txt_chunks="$(( \
+      "${_total_txt_chunks}" + \
+      "${#_txt}" / "${_length}" + \
+      1 ))"
+    # echo \
+    #   "$(( ${#_txt} / ${_length} + 1))"
+    # return
+  fi
+}
+
 _bin2txt() {
   local \
     _in="${1}" \
     _out="${2}" \
     _format="${3}" \
     _length="${4}" \
-    _amount_only="${5}" \
-    _txt
-  if [[ "${_format}" == "base64" ]]; then
+    _buffer_size_bytes="${5}" \
+    _amount_only="${6}" \
+    _txt \
+    _blocks=() \
+    _total_txt_chunks \
+    _chunk
+  _buffer_prepare \
+    "${_in}" \
+    "${_out}" \
+    "${_buffer_size_bytes}"
+  _total_txt_chunks
+  _chunk="1"
+  for _block in \
+    "${_blocks[@]}"; do
+    _msg=(
+      "Reading block '${_block}'." 
+    )
     _msg_info \
-      "reading file: ${_in}"
-    read \
-      -rd \
-        '' \
-      _txt < \
-      <(base64 \
-          "${_in}") || \
-      true
-    _msg_info \
-      "encoded length: ${#_txt}"
-    if [[ "${_amount_only}" == "y" ]]; then
-      echo \
-        "$(( ${#_txt} / ${_length} + 1))"
-      return
+      "${_msg[*]}"
+    "_${_format}_encode"
+    if [[ "${_format}" == "base64" ]]; then
+      read \
+        -rd \
+          '' \
+        _txt < \
+        <(base64 \
+            "${_block}") || \
+        true
+      _msg=(
+        "Block '${_block} encoded"
+	"length: ${#_txt}."
+      )
+      _msg_info \
+        "${_msg[*]}"
+      if [[ "${_amount_only}" == "n" ]]; then
+        _chunk_split \
+          "${_txt}" \
+          "${_length}" \
+          "${_out}"
+      elif [[ "${_amount_only}" == "y" ]]; then
+        _total_txt_chunks="$(( \
+	  "${_total_txt_chunks}" + \
+          "${#_txt}" / "${_length}" + \
+	  1 ))"
+        # echo \
+        #   "$(( ${#_txt} / ${_length} + 1))"
+        # return
+      fi
     fi
-    _chunk_split \
-      "${_txt}" \
-      "${_length}" \
-      "${_out}"
-  fi
+  done
 }
 
 # Set defaults and, if present, overrides
@@ -138,6 +279,10 @@ _set_overrides() {
     "length" \
     "10000"
   _set_override \
+    "buffer" \
+    "size" \
+    "2000000" # 2MB
+  _set_override \
     "amount" \
     "only" \
     "n"
@@ -158,6 +303,7 @@ _show_config() {
   _msg_info "${app_name} configuration"
   _msg_info "                Make date:   ${make_date}"
   _msg_info "          Encoding format:   ${encoding_format}"
+  _msg_info "               Block size:   ${block_size}"
   _msg_info "      Chunk string length:   ${string_length}"
   _msg_info "       Chunks amount only:   ${amount_only}"
   _msg_info "                  In file:   ${in_file}"
@@ -186,6 +332,15 @@ Usage:
   options:
      -f <encoding_format> Encoding format ('base64').
                           Default: '${encoding_format}'
+     -B <buffer_size>     Size the input file will
+                          be split before being read
+			  in memory and passed to
+			  the encoder.
+			  The parameter is directly
+			  passed to 'split', so one
+			  can set ie. 2M, 3K, 1G
+			  and so on.
+			  Default: '${buffer_size}'
      -L <string_length>   String chunk length.
 			  Default: '${string_length}'
      -s                   Only print chunks amount.
@@ -262,6 +417,7 @@ app_opts=(
   "${out_txt}"
   "${encoding_format}"
   "${string_length}"
+  "${buffer_size}"
   "${amount_only}"
 )
 _bin2txt \
