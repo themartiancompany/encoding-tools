@@ -59,6 +59,7 @@ _chunk_split() {
     _in="${1}" \
     _length="${2}" \
     _prefix="${3}" \
+    _last_block="${4}" \
     _chunks \
     _chunk \
     _total \
@@ -182,6 +183,7 @@ _base64_encode() {
   local \
     _block="${1}" \
     _length="${2}" \
+    _last_block="${3}" \
     _txt \
     _msg=()
   read \
@@ -189,6 +191,7 @@ _base64_encode() {
       '' \
     _txt < \
     <(base64 \
+        --wrap=0 \
         "${_block}") || \
     true
   _msg=(
@@ -201,7 +204,8 @@ _base64_encode() {
     _chunk_split \
       "${_txt}" \
       "${_length}" \
-      "${_out}"
+      "${_out}" \
+      "${_last_block}"
   elif [[ "${_amount_only}" == "y" ]]; then
     _txt_chunks_total="$(( \
       "${_total_txt_chunks}" + \
@@ -229,6 +233,7 @@ _bin2txt() {
     _txt_chunks_total \
     _chunk_current \
     _block_current \
+    _block_last \
     _msg=()
   _buffer_prepare \
     "${_in}" \
@@ -244,11 +249,17 @@ _bin2txt() {
     )
     _msg_info \
       "${_msg[*]}"
+    if (( "${_block_current}" < "${_blocks_total}" )); then
+      _last_block="false"
+    elif [[ "${_block_current}" == "${_blocks_total}" ]]; then
+      _last_block="true"
+    fi
     "_${_format}_encode" \
       "${_block}" \
-      "${_length}"
-  _block_current="$(( \
-    _block_current + 1))"
+      "${_length}" \
+      "${_last_block}"
+    _block_current="$(( \
+      _block_current + 1))"
   done
   rm \
     -rf \
