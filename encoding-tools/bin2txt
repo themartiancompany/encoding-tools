@@ -135,7 +135,7 @@ _chunk_split() {
 _blocks_find() {
   local \
     _pattern="${1}" \
-    _pkgname=() \
+    _blocks_unsorted=() \
     _find_opts=()
   shift \
     1
@@ -148,7 +148,7 @@ _blocks_find() {
   _find_opts+=(
     -type
       "f"
-    -print0
+    # -print0
   )
   _msg=(
     "Running find with options"
@@ -158,11 +158,13 @@ _blocks_find() {
     "${_msg[*]}"
   mapfile \
     -d \
-    $'\0' \
+    $'\n' \
     _blocks < \
     <(find \
         "${_pattern}"* \
-        "${_find_opts[@]}" 2>/dev/null || \
+        "${_find_opts[@]}" 2>/dev/null | \
+	sort \
+	  -V || \
       true)
 }
 
