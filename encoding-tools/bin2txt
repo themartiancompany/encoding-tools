@@ -59,7 +59,7 @@ _chunk_split() {
     _in="${1}" \
     _length="${2}" \
     _prefix="${3}" \
-    _last_block="${4}" \
+    _block_last="${4}" \
     _chunks \
     _chunk \
     _total \
@@ -74,10 +74,16 @@ _chunk_split() {
     "${_total}" / "${_length}" + 1))"
   if (( "${_chunks}" < 2 )); then
     _out="${_prefix}"
-    printf \
-      "%s" \
-      "${_in}" > \
-      "${_out}"
+    if [[ "${_block_last}" == "true" ]]; then
+      printf \
+        "%s" \
+        "${_in}" > \
+        "${_out}"
+    elif [[ "${_block_last}" == "false" ]]; then
+      echo \
+        "${_in}" > \
+	"${_out}"
+    fi
     return \
       0
   fi
@@ -100,10 +106,23 @@ _chunk_split() {
     )
     _msg_info \
       "${_msg[*]}"
-    printf \
-      "%s" \
-      "${_cut}" > \
-      "${_out}"
+    if (( "${_chunk}" < "${_chunks}" )); then
+      printf \
+        "%s" \
+        "${_cut}" > \
+        "${_out}"
+    elif [[ "${_chunk}" == "${_chunks}" ]]; then
+      if [[ "${_block_last}" == "true" ]]; then
+        printf \
+          "%s" \
+          "${_cut}" > \
+          "${_out}"
+      elif [[ "${_block_last}" == "false" ]]; then
+        echo \
+          "${_cut}" > \
+          "${_out}"
+      fi
+    fi
   done
   _chunk_current="${_chunks}"
   _msg=(
@@ -183,7 +202,7 @@ _base64_encode() {
   local \
     _block="${1}" \
     _length="${2}" \
-    _last_block="${3}" \
+    _block_last="${3}" \
     _txt \
     _msg=()
   read \
@@ -205,7 +224,7 @@ _base64_encode() {
       "${_txt}" \
       "${_length}" \
       "${_out}" \
-      "${_last_block}"
+      "${_block_last}"
   elif [[ "${_amount_only}" == "y" ]]; then
     _txt_chunks_total="$(( \
       "${_total_txt_chunks}" + \
@@ -250,14 +269,14 @@ _bin2txt() {
     _msg_info \
       "${_msg[*]}"
     if (( "${_block_current}" < "${_blocks_total}" )); then
-      _last_block="false"
+      _block_last="false"
     elif [[ "${_block_current}" == "${_blocks_total}" ]]; then
-      _last_block="true"
+      _block_last="true"
     fi
     "_${_format}_encode" \
       "${_block}" \
       "${_length}" \
-      "${_last_block}"
+      "${_block_last}"
     _block_current="$(( \
       _block_current + 1))"
   done
