@@ -69,7 +69,8 @@ _chunk_split() {
     _msg=()
   _total="${#_in}"
   _chunks="$(( \
-    ${_total} / ${_length} + 1))"
+    "${_chunk_current}" +
+    "${_total}" / "${_length}" + 1))"
   if (( "${_chunks}" < 2 )); then
     _out="${_prefix}"
     printf \
@@ -79,11 +80,15 @@ _chunk_split() {
     return \
       0
   fi
+  _msg=(
+    "Chunking ${_total}"
+    "letters into '${_chunks}'."
+  )
   _msg_info \
-    "chunking ${_total} letters into '${_chunks}'"
+    "${_msg[*]}"
   for _chunk \
-    in $(seq \
-           "$(( ${_chunks}))"); do
+    in $(seq "$(( "${_chunk_current}" + 1 ))" \
+             "${_chunks}"); do
     _chunk_start="$(( \
       _chunk * _length - _length ))"
     _cut="${_in:${_chunk_start}:${_length}}"
@@ -99,8 +104,13 @@ _chunk_split() {
       "${_cut}" > \
       "${_out}"
   done
+  _chunk_current="${_chunks}"
+  _msg=(
+    "Finished encoding block"
+    "'${_block}'."
+  )
   _msg_info \
-    "finished"
+    "${_msg[*]}"
 }
 
 _blocks_find() {
@@ -142,7 +152,6 @@ _buffer_prepare() {
     _in="${1}" \
     _out="${2}" \
     _buffer_size_bytes="${3}" \
-    _blocks_total \
     _in_size_bytes \
     _split_opts=() \
     _msg=()
@@ -168,6 +177,11 @@ _buffer_prepare() {
 }
 
 _base64_encode() {
+  local \
+    _block="${1}" \
+    _length="${2}" \
+    _txt \
+    _msg=()
   read \
     -rd \
       '' \
@@ -184,16 +198,14 @@ _base64_encode() {
   if [[ "${_amount_only}" == "n" ]]; then
     _chunk_split \
       "${_txt}" \
+      "${_chunk}" \
       "${_length}" \
       "${_out}"
   elif [[ "${_amount_only}" == "y" ]]; then
-    _total_txt_chunks="$(( \
+    _txt_chunks_total="$(( \
       "${_total_txt_chunks}" + \
       "${#_txt}" / "${_length}" + \
       1 ))"
-    # echo \
-    #   "$(( ${#_txt} / ${_length} + 1))"
-    # return
   fi
 }
 
@@ -205,54 +217,41 @@ _bin2txt() {
     _length="${4}" \
     _buffer_size_bytes="${5}" \
     _amount_only="${6}" \
-    _txt \
     _blocks=() \
-    _total_txt_chunks \
-    _chunk
+    _blocks_total \
+    _txt_chunks_total \
+    _chunk_current \
+    _block_current \
+    _msg=()
   _buffer_prepare \
     "${_in}" \
     "${_out}" \
     "${_buffer_size_bytes}"
-  _total_txt_chunks
-  _chunk="1"
+  _chunk_current="0"
+  _block_current="1"
   for _block in \
     "${_blocks[@]}"; do
     _msg=(
-      "Reading block '${_block}'." 
+      "Reading block '${_block_current}'" 
+      "of '${_blocks_total}'."
     )
     _msg_info \
       "${_msg[*]}"
-    "_${_format}_encode"
-    if [[ "${_format}" == "base64" ]]; then
-      read \
-        -rd \
-          '' \
-        _txt < \
-        <(base64 \
-            "${_block}") || \
-        true
-      _msg=(
-        "Block '${_block} encoded"
-	"length: ${#_txt}."
-      )
-      _msg_info \
-        "${_msg[*]}"
-      if [[ "${_amount_only}" == "n" ]]; then
-        _chunk_split \
-          "${_txt}" \
-          "${_length}" \
-          "${_out}"
-      elif [[ "${_amount_only}" == "y" ]]; then
-        _total_txt_chunks="$(( \
-	  "${_total_txt_chunks}" + \
-          "${#_txt}" / "${_length}" + \
-	  1 ))"
-        # echo \
-        #   "$(( ${#_txt} / ${_length} + 1))"
-        # return
-      fi
-    fi
+    "_${_format}_encode" \
+      "${_block}" \
+      "${_length}"
   done
+  if [[ "${_amount_only}" == "y" ]]; then
+    echo \
+      "${_txt_chunks_total}"
+  elif [[ "${_amount_only}" == "n" ]]; then
+    _msg=(
+      "Finished '${_format}' encoding"
+      "input file '${_in}'."
+    )
+    _msg_info \
+      "${_msg[*]}"
+  fi
 }
 
 # Set defaults and, if present, overrides
