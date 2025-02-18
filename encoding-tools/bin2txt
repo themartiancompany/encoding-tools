@@ -338,14 +338,10 @@ Usage:
   options:
      -f <encoding_format> Encoding format ('base64').
                           Default: '${encoding_format}'
-     -B <buffer_size>     Size the input file will
+     -B <buffer_size>     Size in bytes the input file will
                           be split before being read
 			  in memory and passed to
 			  the encoder.
-			  The parameter is directly
-			  passed to 'split', so one
-			  can set ie. 2M, 3K, 1G
-			  and so on.
 			  Default: '${buffer_size}'
      -L <string_length>   String chunk length.
 			  Default: '${string_length}'
