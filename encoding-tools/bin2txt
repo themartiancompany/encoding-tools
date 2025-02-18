@@ -106,8 +106,7 @@ _chunk_split() {
   done
   _chunk_current="${_chunks}"
   _msg=(
-    "Finished encoding block"
-    "'${_block}'."
+    "Finished encoding block."
   )
   _msg_info \
     "${_msg[*]}"
@@ -132,8 +131,8 @@ _blocks_find() {
     -print0
   )
   _msg=(
-    "running find with options"
-    "'${_find_opts[@]}'"
+    "Running find with options"
+    "'${_find_opts[@]}'."
   )
   _msg_info \
     "${_msg[*]}"
@@ -190,7 +189,7 @@ _base64_encode() {
         "${_block}") || \
     true
   _msg=(
-    "Block '${_block} encoded"
+    "Block '${_block} encoded,"
     "length: ${#_txt}."
   )
   _msg_info \
@@ -207,6 +206,12 @@ _base64_encode() {
       "${#_txt}" / "${_length}" + \
       1 ))"
   fi
+  _msg=(
+    "Finished encoding block"
+    "'${_block}'."
+  )
+  _msg_info \
+    "${_msg[*]}"
 }
 
 _bin2txt() {
@@ -240,6 +245,8 @@ _bin2txt() {
     "_${_format}_encode" \
       "${_block}" \
       "${_length}"
+  _block_current="$(( \
+    _block_current + 1))"
   done
   if [[ "${_amount_only}" == "y" ]]; then
     echo \
