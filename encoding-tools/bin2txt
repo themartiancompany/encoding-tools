@@ -97,7 +97,7 @@ _chunk_split() {
     in $(seq "$(( "${_chunk_current}" + 1 ))" \
              "${_chunks}"); do
     _chunk_start="$(( \
-      _chunk * _length - _length ))"
+      ( _chunk - _chunk_current ) * _length - _length ))"
     _cut="${_in:${_chunk_start}:${_length}}"
     _out="${_prefix}.${_chunk}"
     _msg=(
@@ -118,7 +118,14 @@ _chunk_split() {
           "${_cut}" > \
           "${_out}"
       elif [[ "${_block_last}" == "false" ]]; then
-        echo \
+        _msg=(
+          "Last chunk of non-last block,"
+	  "adding a newline character at the end."
+	)
+	_msg_info \
+          "${_msg[*]}"
+        printf \
+	  "%s\n" \
           "${_cut}" > \
           "${_out}"
       fi
@@ -136,7 +143,9 @@ _blocks_find() {
   local \
     _pattern="${1}" \
     _blocks_unsorted=() \
-    _find_opts=()
+    _find_opts=() \
+    _blocks_dirty=() \
+    _block
   shift \
     1
   _msg=(
@@ -159,13 +168,18 @@ _blocks_find() {
   mapfile \
     -d \
     $'\n' \
-    _blocks < \
+    _blocks_dirty < \
     <(find \
         "${_pattern}"* \
         "${_find_opts[@]}" 2>/dev/null | \
 	sort \
 	  -V || \
       true)
+  for _block in "${_blocks_dirty[@]}"; do
+    _blocks+=(
+      "${_block%$'\n'}"
+    )
+  done
 }
 
 _buffer_prepare() {
@@ -265,8 +279,9 @@ _bin2txt() {
   for _block in \
     "${_blocks[@]}"; do
     _msg=(
-      "Reading block '${_block_current}'" 
-      "of '${_blocks_total}'."
+      "Reading block '${_block}'"
+      "('${_block_current}'" 
+      "of '${_blocks_total}')."
     )
     _msg_info \
       "${_msg[*]}"
