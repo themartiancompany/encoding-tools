@@ -242,7 +242,7 @@ _base64_encode() {
       "${_out}" \
       "${_block_last}"
   elif [[ "${_amount_only}" == "y" ]]; then
-    _chunks_total+="$(( \
+    _chunks_total="$(( \
       "${_chunks_total}" + \
       "${#_txt}" / "${_length}" + \
       1 ))"
@@ -274,6 +274,7 @@ _bin2txt() {
     "${_in}" \
     "${_out}" \
     "${_buffer_size_bytes}"
+  _chunks_total=0
   _chunk_current="0"
   _block_current="1"
   for _block in \
