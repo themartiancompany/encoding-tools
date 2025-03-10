@@ -242,8 +242,8 @@ _base64_encode() {
       "${_out}" \
       "${_block_last}"
   elif [[ "${_amount_only}" == "y" ]]; then
-    _txt_chunks_total="$(( \
-      "${_total_txt_chunks}" + \
+    _chunks_total+="$(( \
+      "${_chunks_total}" + \
       "${#_txt}" / "${_length}" + \
       1 ))"
   fi
@@ -265,7 +265,7 @@ _bin2txt() {
     _amount_only="${6}" \
     _blocks=() \
     _blocks_total \
-    _txt_chunks_total \
+    _chunks_total \
     _chunk_current \
     _block_current \
     _block_last \
@@ -302,7 +302,7 @@ _bin2txt() {
     "${_blocks[@]}"
   if [[ "${_amount_only}" == "y" ]]; then
     echo \
-      "${_txt_chunks_total}"
+      "${_chunks_total}"
   elif [[ "${_amount_only}" == "n" ]]; then
     _msg=(
       "Finished '${_format}' encoding"
