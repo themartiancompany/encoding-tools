@@ -7,6 +7,12 @@ This tools are a depedency for the
   https://github.com/themartiancompany/evmfs)
 and for the uncensorable Twitter.
 
+They depend on the `base64` encoding tool
+and the
+[Crash Bash](
+  https://github.com/themartiancompany/crash-bash)
+library.
+
 ## Installation
 
 The tools in this source repo
