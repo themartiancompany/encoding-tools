@@ -24,8 +24,11 @@ PREFIX ?= /usr/local
 DOC_DIR=$(DESTDIR)$(PREFIX)/share/doc/$(_PROJECT)
 BIN_DIR=$(DESTDIR)$(PREFIX)/bin
 DATA_DIR=$(DESTDIR)$(PREFIX)/share/$(_PROJECT)
+MAN_DIR?=$(DESTDIR)$(PREFIX)/share/man
 
-DOC_FILES=$(wildcard *.rst)
+DOC_FILES=\
+  $(wildcard *.rst) \
+  $(wildcard *.md)
 SCRIPT_FILES=$(wildcard $(_PROJECT)/*)
 
 all:
@@ -35,7 +38,7 @@ check: shellcheck
 shellcheck:
 	shellcheck -s bash $(SCRIPT_FILES)
 
-install: install-scripts install-doc
+install: install-scripts install-doc install-man
 
 install-doc:
 
@@ -47,4 +50,17 @@ install-scripts:
 	install -vDm 755 $(_PROJECT)/bin2txt "$(BIN_DIR)"
 	install -vDm 755 $(_PROJECT)/txt2bin "$(BIN_DIR)"
 
-.PHONY: check install install-doc install-scripts shellcheck
+install-man:
+
+	install \
+	  -vdm755 \
+	  "$(MAN_DIR)/man1"
+	rst2man \
+	  "man/bin2txt.1.rst" \
+	  "$(MAN_DIR)/man1/bin2txt.1"
+	rst2man \
+	  "man/txt2bin.1.rst" \
+	  "$(MAN_DIR)/man1/txt2bin.1"
+
+
+.PHONY: check install install-doc install-man install-scripts shellcheck

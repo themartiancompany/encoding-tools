@@ -184,13 +184,14 @@ _usage() {
       _usage_text << \
         ENDUSAGETEXT || true
 
-Converts text to picture.
+Converts text to binary.
 
 Usage:
-  $(_get "app" "name")
+  ${app_name}
     [options]
     <out_file>
     [in_text]
+
   options:
      -f <encoding_format> Encoding format ('base64').
                           Default: '$(_get "encoding" "format")'

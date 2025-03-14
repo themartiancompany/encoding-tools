@@ -384,10 +384,11 @@ _usage() {
 Converts binary to ascii text.
 
 Usage:
-  $(_get "app" "name")
+  ${app_name}
     [options]
     <in_file>
-    <out_txt>
+    <out_txt_prefix>
+
   options:
      -f <encoding_format> Encoding format ('base64').
                           Default: '${encoding_format}'
