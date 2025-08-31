@@ -73,7 +73,7 @@ _assemble() {
   if [[ "${_argument_type}" == "list" ]]; then
     _msg=(
       "Merging files from list at"
-      "'${_in[0]}' into '${_out}'."
+      "'${_list}' into '${_out}'."
     )
   elif [[ "${_argument_type}" == "file" ]]; then
     "Merging '${_in[*]}' into '${_out}'."
@@ -140,13 +140,15 @@ _txt2bin() {
     _out="${1}" \
     _format="${2}" \
     _argument_type="${3}" \
-    _in=()
+    _in=() \
+    _list
   shift \
     3
   _in+=(
     "$@"
   )
   if [[ "${_argument_type}" == "list" ]]; then
+    _list="${_in[0]}"
     _in=( $( \
       cat \
         "${_in[0]}")
