@@ -52,6 +52,7 @@ _global_variables() {
   make_date=""
   out_file=""
   encoding_format=""
+  argument_type=""
   in_texts=()
   color=""
   quiet=""
@@ -69,7 +70,7 @@ _assemble() {
     "$@"
   )
   _msg_info \
-    "merging '${_in[*]}' into '${_out}'"
+    "Merging '${_in[*]}' into '${_out}'."
   for _file \
     in "${_in[@]}"; do
     IFS= \
@@ -86,7 +87,7 @@ _assemble() {
       "${_out}"
   done
   _msg_info \
-    "merging finished"
+    "Merging finished."
 }
 
 _base64_decode() {
@@ -111,7 +112,7 @@ _base64_decode() {
       "${_in[@]}"
   fi
   _msg_info \
-    "decoding ${_txt} into ${_out}"
+    "Decoding ${_txt} into ${_out}."
   base64 \
    -d \
    "${_txt}" > \
@@ -129,12 +130,19 @@ _txt2bin() {
   local \
     _out="${1}" \
     _format="${2}" \
+    _argument_type="${3}" \
     _in=()
   shift \
-    2
+    3
   _in+=(
     "$@"
   )
+  if [[ "${_argument_type}" == "list" ]]; then
+    _in=( $( \
+      cat \
+        "${_in[0]}")
+    )
+  fi
   "_${_format}_decode" \
     "${_out}" \
     "${_in[@]}"
@@ -151,6 +159,10 @@ _set_overrides() {
     "encoding" \
     "format" \
     "base64"
+  _set_override \
+    "argument" \
+    "type" \
+    "file"
   _set_override \
     "out" \
     "file" \
@@ -170,10 +182,11 @@ _set_overrides() {
 # Shows configuration options.
 _show_config() {
   _msg_info "${app_name} configuration"
-  _msg_info "                Make date:   $(_get "make" "date")"
-  _msg_info "          Encoding format:   $(_get "encoding" "format")"
-  _msg_info "                 Out file:   $(_get "out" "file")"
-  _msg_info "       Input text file(s):   $(_get "in" "texts")"
+  _msg_info "                Make date:   ${make_date}"
+  _msg_info "            Argument type:   ${argument_type}"
+  _msg_info "          Encoding format:   ${encoding_format}"
+  _msg_info "                 Out file:   ${out_file}"
+  _msg_info "       Input text file(s):   ${in_texts[*]}"
 }
 
 # Show help usage, with an exit status.
@@ -197,8 +210,16 @@ Usage:
     [in_text]
 
   options:
+     -t <argument_type>   Possible values are 'file' and
+                          'list'.
+                          When it is 'file' the arguments
+			  are the encoded file paths,
+                          when it is 'list' the argument is
+                          a file containing the paths of the
+                          encoded files.
+                          Default: '${argument_type}'
      -f <encoding_format> Encoding format ('base64').
-                          Default: '$(_get "encoding" "format")'
+                          Default: '${encoding_format}'
 
      -h                   This message.
      -v                   Enable verbose output
@@ -217,10 +238,11 @@ _requirements
 # shellcheck disable=SC2034
 while \
   getopts \
-    'f:cvh?' \
+    't:f:cvh?' \
     arg; do
   case \
     "${arg}" in
+    t) override_argument_type="${OPTARG}" ;;
     f) override_encoding_format="${OPTARG}" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;
@@ -229,7 +251,7 @@ while \
            0 ;;
     *)
     _msg_error \
-      "Invalid argument '${arg}'" \
+      "Invalid argument '${arg}'." \
       0 && \
     _set_overrides && \
     _usage \
@@ -243,15 +265,12 @@ shift \
   ))
 (( $# < 2 )) && \
   _msg_error \
-    "missing arguments" \
+    "Missing arguments." \
     0 && \
   _set_overrides && \
   _usage \
     1
-_set \
-  "out" \
-  "file" \
-  "${1}"
+out_file="${1}"
 shift \
   1
 in_texts+=(
@@ -260,12 +279,9 @@ in_texts+=(
 _set_overrides
 _show_config
 app_opts=(
-  "$(_get \
-       "out" \
-       "file")"
-  "$(_get \
-       "encoding" \
-       "format")"
+  "${out_file}"
+  "${encoding_format}"
+  "${argument_type}"
   "${in_texts[@]}"
 )
 _txt2bin \

@@ -21,6 +21,14 @@ Converts text to binary.
 Options
 ========
 
+
+-t argument_type        Possible values are 'file' and
+                        'list'.
+                        When it is 'file' the arguments
+                        are the encoded file paths,
+                        when it is 'list' the argument is
+                        a file containing the paths of the
+                        encoded files.
 -f encoding_format      Encoding format ('base64').
 
 -h                      Display help.
