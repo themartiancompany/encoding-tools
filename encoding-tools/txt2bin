@@ -120,12 +120,20 @@ _base64_decode() {
       "${_txt}" \
       "${_in[@]}"
   fi
-  _msg_info \
+  _msg=(
     "Decoding ${_txt} into ${_out}."
-  base64 \
-   -d \
-   "${_txt}" > \
-   "${_out}"
+  )
+  _msg_info \
+    "${_msg[*]}"
+  ( base64 \
+      -d \
+      "${_txt}" > \
+      "${_out}" ) || \
+  ( _msg=(
+      "Decoding failed."
+    )
+    _msg_error \
+      "${_msg[*]}" )
   if [[ "${_txt}" != "${_in}" ]]; then
     rm \
       "${_txt}"
