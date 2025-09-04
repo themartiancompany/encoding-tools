@@ -76,7 +76,9 @@ _assemble() {
       "'${_list}' into '${_out}'."
     )
   elif [[ "${_argument_type}" == "file" ]]; then
-    "Merging '${_in[*]}' into '${_out}'."
+    _msg=(
+      "Merging '${_in[*]}' into '${_out}'."
+    )
   fi
   _msg_info \
     "${_msg[*]}"
