@@ -390,25 +390,24 @@ Converts binary to ascii text.
 Usage:
   ${app_name}
     [options]
-    <in_file>
-    <out_txt_prefix>
+    <in-file>
+    <out-txt-prefix>
 
   options:
-     -f <encoding_format> Encoding format ('base64').
-                          Default: '${encoding_format}'
-     -B <buffer_size>     Size in bytes the input file will
-                          be split before being read
-			  in memory and passed to
-			  the encoder.
-			  Default: '${buffer_size}'
-     -L <string_length>   String chunk length.
-			  Default: '${string_length}'
-     -s                   Only print chunks amount.
-                          Default: '${amount_only}'
+     -f <encoding-format>   Encoding format ('base64').
+                            Default: '${encoding_format}'
+     -B <buffer-size>       Size in bytes the input file will
+                            be split before being read
+                            in memory and passed to
+                            the encoder.
+                            Default: '${buffer_size}'
+     -L <string-length>     String chunk length.
+                            Default: '${string_length}'
+     -s                     Only print chunks amount.
+                            Default: '${amount_only}'
 
-
-     -h                   This message.
-     -v                   Enable verbose output
+     -h                     This message.
+     -v                     Enable verbose output
 ENDUSAGETEXT
   _printf \
     '%s\n' \
