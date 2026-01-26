@@ -1,0 +1,237 @@
+#!/usr/bin/env node
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//    ----------------------------------------------------------------------
+//    Copyright © 2024, 2025  Pellegrino Prevete
+//
+//    All rights reserved
+//    ----------------------------------------------------------------------
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU Affero General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU Affero General Public License for more details.
+//
+//    You should have received a copy of the GNU Affero General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+const
+  _libcrash =
+  require(
+    'crash-js');
+_argv_get =
+  _libcrash._argv_get;
+_cmdline_check =
+  _libcrash._cmdline_check;
+_error_display =
+  _libcrash._error_display;
+_ext_rm =
+  _libcrash._ext_rm;
+_file_read =
+  _libcrash._file_read;
+_file_write =
+  _libcrash._file_write;
+_fs_worker_start =
+  _libcrash._fs_worker_start;
+_json_read =
+  _libcrash._json_read;
+_ls =
+  _libcrash._ls;
+_mkdir =
+  _libcrash._mkdir;
+_msg_info =
+  _libcrash._msg_info;
+_msg_error =
+  _libcrash._msg_error;
+
+function
+  _global_variables() {
+  app_name =
+    "ahsi";
+  target_message =
+    "";
+  target_planet =
+    "";
+  runtime_environment =
+    "";
+  quiet =
+    "";
+}
+
+async function
+  _ahsi(
+    _target_message,
+    _target_planet) {
+  let
+    _agent,
+    _dir_content,
+    _content,
+    _dir,
+    _file,
+    _msg,
+    _worker;
+  _dir =
+    "/test_dir";
+  _file =
+    `${_dir}/test_file`;
+  _content =
+    `${_target_message} ${_target_planet}`;
+  await _fs_worker_start(
+      "fs-worker.js");
+  _msg =
+    `Creating directory '${_dir}':`;
+  _msg_info(
+    _msg);
+  _mkdir(
+    _dir);
+  _msg =
+    `Writing content '${_content}' to file '${_file}':`;
+  _msg_info(
+    _msg);
+  _file_write(
+    _file,
+    _content);
+  _msg =
+    `Content of directory '/':`;
+  _msg_info(
+    _msg);
+  _dir_content =
+    _ls(
+      "/").unwrap();
+  console.log(
+    _dir_content);
+  _msg =
+    `Content of directory '${_dir}':`;
+  _msg_info(
+    _msg);
+  _dir_content =
+    _ls(
+      _dir).unwrap();
+  console.log(
+    _dir_content);
+}
+
+function
+  _config_show() {
+  let
+    _line,
+    _text;
+  _text = [
+    `      Runtime environment: ${runtime_environment}`,
+    `           Target message: ${target_message}`,
+    `            Target planet: ${target_planet}`,
+  ];
+  for ( _line of _text ) {
+    _msg_info(
+      _line);
+  }
+}
+
+
+function
+  _usage(
+    _exit_code) {
+  let
+    _line,
+    _text;
+  _text = [
+    "Hello world application for browsers and computers",
+    "",
+    "Usage:",
+    "  ahsi",
+    "    <quiet>",
+    "    <message>",
+    "    <planet>",
+    "",
+    "Args:",
+    "  <quiet>                          Can be 'y' or 'n'",
+    "                                   Default: y",
+  ];
+  for ( _line of _text ) {
+    _msg_info(
+      _line);
+  }
+  process.exit(
+    _exit_code);
+}
+
+function 
+  _cmdline_parse() {
+  quiet = 
+    "y";
+  runtime_environment =
+    "node";
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        quiet =
+          _value;
+      }
+      if ( _index == 3 ) {
+        target_message =
+          _value;
+      }
+      if ( _index == 4 ) {
+        target_planet =
+          _value;
+      }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        quiet =
+          "n";
+        _usage(
+          0);
+      }
+  });
+}
+
+function
+  _url_parse() {
+  let
+    _argv;
+  runtime_environment =
+    "browser";
+  _argv =
+    _argv_url_get();
+  target_message =
+    _argv_url_get(
+      "target_message")[0];
+  target_planet =
+    _argv_url_get(
+      "target_planet")[0];
+  quiet =
+    _argv_url_get(
+      "quiet");
+  if ( quiet.length === 0 ) {
+    quiet =
+      "n";
+  }
+}
+
+_global_variables();
+
+_global_variables();
+if ( _cmdline_check(
+       "ahsi") == true ) {
+  _cmdline_parse();
+}
+else {
+  _url_parse();
+}
+_config_show();
+app_opts = [
+  target_message,
+  target_planet
+];
+_ahsi.apply(
+  null,
+  app_opts);

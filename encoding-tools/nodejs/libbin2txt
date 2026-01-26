@@ -1,0 +1,122 @@
+#!/usr/bin/env node
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//    ----------------------------------------------------------------------
+//    Copyright © 2024, 2025  Pellegrino Prevete
+//
+//    All rights reserved
+//    ----------------------------------------------------------------------
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU Affero General Public License as
+//    published by the Free Software Foundation, either version 3 of
+//    the License, or (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU Affero General Public License for more details.
+//
+//    You should have received a copy of the GNU Affero General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+const
+  _libcrash =
+  require(
+    'crash-js');
+_error_display =
+  _libcrash._error_display;
+_ext_rm =
+  _libcrash._ext_rm;
+_file_read =
+  _libcrash._file_read;
+_file_write =
+  _libcrash._file_write;
+_fs_worker_start =
+  _libcrash._fs_worker_start;
+_json_read =
+  _libcrash._json_read;
+_ls =
+  _libcrash._ls;
+_mkdir =
+  _libcrash._mkdir;
+_msg_info =
+  _libcrash._msg_info;
+_msg_error =
+  _libcrash._msg_error;
+_split =
+  _libcrash._split;
+
+async function
+  _bin2txt(
+    _in,
+    _out,
+    _format,
+    _length,
+    _buffer_size_bytes,
+    _amount_only) {
+  let
+    _blocks_total,
+    _chunks_total,
+    _chunk_current,
+    _block_current,
+    _block_last,
+    _dir,
+    _file,
+    _msg,
+    _worker;
+  _dir =
+    "/test_dir";
+  _file =
+    `${_dir}/test_file`;
+  _content =
+    `${_in} ${_out}`;
+  if ( typeof window !== 'undefined' ) {
+    await _fs_worker_start(
+        "fs-worker.js");
+  }
+  _split(
+    "red-sun-in-the-sky.mp4",
+    2,
+
+  console.log(
+    _split
+  );
+  // _msg =
+  //   `Creating directory '${_dir}':`;
+  // _msg_info(
+  //   _msg);
+  // _mkdir(
+  //   _dir);
+  // _msg =
+  //   `Writing content '${_content}' to file '${_file}':`;
+  // _msg_info(
+  //   _msg);
+  // _file_write(
+  //   _file,
+  //   _content);
+  // _msg =
+  //   `Content of directory '/':`;
+  // _msg_info(
+  //   _msg);
+  // _dir_content =
+  //   _ls(
+  //     "/").unwrap();
+  // console.log(
+  //   _dir_content);
+  // _msg =
+  //   `Content of directory '${_dir}':`;
+  // _msg_info(
+  //   _msg);
+  // _dir_content =
+  //   _ls(
+  //     _dir).unwrap();
+  // console.log(
+  //   _dir_content);
+}
+
+module.exports = {
+  _bin2txt:
+    _bin2txt,
+};

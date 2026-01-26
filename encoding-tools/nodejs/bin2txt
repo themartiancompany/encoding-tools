@@ -1,0 +1,254 @@
+#!/usr/bin/env node
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//    ----------------------------------------------------------------------
+//    Copyright © 2024, 2025  Pellegrino Prevete
+//
+//    All rights reserved
+//    ----------------------------------------------------------------------
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU Affero General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU Affero General Public License for more details.
+//
+//    You should have received a copy of the GNU Affero General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+const
+  _libcrash =
+  require(
+    'crash-js');
+_cmdline_check =
+  _libcrash._cmdline_check;
+_msg_info =
+  _libcrash._msg_info;
+_msg_error =
+  _libcrash._msg_error;
+const
+  _encoding_tools =
+    require(
+      "./encoding-tools");
+_bin2txt =
+  _encoding_tools._bin2txt;
+
+function
+  _global_variables() {
+  app_name =
+    "bin2txt";
+  encoding_format =
+    "";
+  buffer_size =
+    "";
+  string_length =
+    "";
+  in_file =
+    "";
+  out_txt_prefix =
+    "";
+  quiet =
+    "";
+}
+
+function 
+  _overrides_set() {
+  if ( target_message == "" ) {
+    encoding_format =
+      "base64";
+  }
+  if ( string_length == "" ) {
+    string_length =
+      "10000";
+  }
+  if ( buffer_size == "" ) {
+    buffer_size =
+      "2000000"; // 2MB
+  }
+  if ( amount_only == false ) {
+    amount_only =
+      false;
+  }
+}
+
+function
+  _config_show() {
+  let
+    _line,
+    _text;
+  _text = [
+    `${app_name} configuration:`,
+    `      Runtime environment:   ${runtime_environment}`,
+    `          Encoding format:   ${encoding_format}`,
+    `              Buffer size:   ${buffer_size}`,
+    `      Chunk string length:   ${string_length}`,
+    `       Chunks amount only:   ${amount_only}`,
+    `                  In file:   ${in_file}`,
+    `          Out text prefix:   ${out_txt_prefix}`,
+  ];
+  for ( _line of _text ) {
+    _msg_info(
+      _line);
+  }
+}
+
+function
+  _usage(
+    _exit_code) {
+  let
+    _line,
+    _text;
+  _text = [
+    "Converts binary to ascii text.",
+    "",
+    "Usage:",
+    "",
+    "  bin2txt",
+    "    <in-file>",
+    "    <out-txt-prefix>",
+    "",
+    "  arguments:",
+    "    <in-file>                        An input file.",
+    "    <out-file-prefix>                Prefix for the output file(s).",
+    "",
+    "  options:",
+    "",
+    "     -f --encoding-format            Encoding format ('base64').",
+    `       <encoding-format>             Default: '${encoding_format}`,
+    "",
+    "     -B --buffer-size                Size in bytes the input file will",
+    "       <buffer-size>                 be split before being read",
+    "                                     in memory and passed to",
+    "                                     the encoder.",
+    `                                     Default: '${buffer_size}'`,
+    "",
+    "     -L --string-length              String chunk length.",
+    `       <string-length>               Default: '${string_length}'`,
+    "",
+    "     -s --amount-only                Only print chunks amount.",
+    `                                     Default: '${amount_only}'`,
+    "",
+    "     -h --help                       This message.",
+    "     -v --verbose                    Enable verbose output."
+  ];
+  for ( _line of _text ) {
+    _msg_info(
+      _line);
+  }
+  process.exit(
+    _exit_code);
+}
+
+function 
+  _cmdline_parse() {
+  let
+    _argv,
+    _msg;
+  _argv =
+    _yargv_get();
+  quiet = 
+    "y";
+  runtime_environment =
+    "node";
+  help_display =
+    _argv[
+      "help"] ||
+    _argv[
+      "h"];
+  if ( help_display ) {
+    quiet =
+      "n";
+    _usage(
+      0);
+  }
+  if ( _argv[
+         "_"].length < 1 ) {
+    _msg =
+      "Input file argument required.";
+    _msg_error(
+      _msg,
+      0);
+    _usage(
+      1);
+  }
+  in_file =
+    _argv[
+      "_"][
+        0];
+  if ( _argv[
+         "_"].length < 2 ) {
+    out_txt_prefix =
+      in_file + ".base64"
+  }
+  if ( "s" in _argv ) {
+    string_length =
+      _argv[
+        "s"];
+  }
+  if ( "string-length" in _argv ) {
+    string_length =
+      _argv[
+        "string-length"];
+  }
+  amount_only =
+    _argv[
+      "amount-only"] ||
+    _argv[
+      "s"];
+  verbose =
+    _argv[
+      "verbose"] ||
+    _argv[
+      "v"];
+  if ( verbose ) {
+    quiet =
+      "n";
+  }
+}
+
+function
+  _url_parse() {
+  let
+    _argv;
+  runtime_environment =
+    "browser";
+  _argv =
+    _argv_url_get();
+  in_file =
+    _argv_url_get(
+      "in_file")[
+        0];
+  target_planet =
+    _argv_url_get(
+      "out_txt_prefix")[
+        0];
+  quiet =
+    _argv_url_get(
+      "quiet");
+  if ( quiet.length === 0 ) {
+    quiet =
+      "n";
+  }
+}
+
+_global_variables();
+if ( _cmdline_check(
+       "bin2txt") == true ) {
+  _cmdline_parse();
+}
+else {
+  _url_parse();
+}
+_config_show();
+app_opts = [
+  in_file,
+  out_txt_prefix
+];
+_bin2txt.apply(
+  null,
+  app_opts);

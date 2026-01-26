@@ -1,0 +1,88 @@
+{
+  "name":
+    "encoding-tools",
+  "version":
+    "0.0.1",
+  "description":
+    "A multi-language collection of encoding tools.",
+  "funding": {
+    "type":
+      "patreon",
+    "url":
+      "https://patreon.com/tallero"
+  },
+  "man":
+    "./man/ahsi.1",
+  "files": [
+    "AUTHORS.rst",
+    "COPYING",
+    "README.md",
+    "package.json",
+    "ahsi.js",
+    "ahsi",
+    "fs-worker.js",
+    "fs-worker.webpack.config.js",
+    "index.html",
+    "serve.json",
+    "webpack.config.js"
+  ],
+  "keywords": [
+    "ur",
+    "themartiancompany",
+    "dogeos"
+  ],
+  "homepage":
+    "https://github.com/themartiancompany/encoding-tools",
+  "bugs": {
+    "url":
+      "https://github.com/themartiancompany/encoding-tools/issues"
+  },
+  "repository": {
+    "type":
+      "git",
+    "url":
+      "git+https://github.com/themartiancompany/encoding-tools.git"
+  },
+  "license":
+    "AGPL-3.0-or-later",
+  "author": {
+    "name":
+      "Pellegrino Prevete",
+    "email":
+      "pellegrinoprevete@gmail.com",
+    "url":
+      "https://github.com/tallero"
+  },
+  "devDependencies": {
+    "eslint":
+      "^9.32.0",
+    "serve":
+      "^14.2.5",
+    "webpack":
+      "^5.102.1",
+    "webpack-cli":
+      "^6.0.1"
+  },
+  "dependencies": {
+    "crash-js":
+      "^0.1.51",
+    "yargs":
+      "18.0.0"
+  },
+  "type":
+    "commonjs",
+  "main":
+    "encoding-tools",
+  "scripts": {
+    "build":
+      "cd ../.. && make build-npm && encoding-tools/nodejs",
+    "lint":
+      "npx eslint .",
+    "publish-pnm":
+      "npm run build && npm publish --access public",
+    "start":
+      "serve -c 'serve.json'",
+    "test":
+      "echo \"Error: no test specified\" && exit 1"
+  }
+}
