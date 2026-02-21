@@ -17,13 +17,16 @@
     "AUTHORS.rst",
     "COPYING",
     "README.md",
-    "package.json",
-    "ahsi.js",
+    "bin2txt",
+    "libbin2txt",
+    "libtxt2bin",
     "ahsi",
     "fs-worker.js",
     "fs-worker.webpack.config.js",
     "index.html",
+    "package.json",
     "serve.json",
+    "txt2bin",
     "webpack.config.js"
   ],
   "keywords": [
@@ -56,7 +59,7 @@
   "devDependencies": {
     "eslint":
       "^9.32.0",
-    "serve":
+    "safely-serve":
       "^14.2.5",
     "webpack":
       "^5.102.1",
@@ -80,7 +83,7 @@
       "cd ../.. && make build-npm && encoding-tools/nodejs",
     "lint":
       "npx eslint .",
-    "publish-pnm":
+    "publish-npm":
       "npm run build && npm publish --access public",
     "start":
       "serve -c 'serve.json'",
