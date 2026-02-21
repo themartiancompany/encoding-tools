@@ -2,7 +2,7 @@
 
 Simple, easy to read and use collection of encoding tools.
 
-This tools are a depedency for the
+This tools are a dependency for the
 [Ethereum Virtual Machine File System](
   https://github.com/themartiancompany/evmfs)
 and for the uncensorable Twitter.
@@ -23,8 +23,8 @@ make \
   install
 ```
 
-The collection has officially published on the
-the uncensorable
+The collection has officially been published
+on the the uncensorable
 [Ur](
   https://github.com/themartiancompany/ur)
 user repository and application store as
@@ -44,7 +44,7 @@ ur \
 A censorable HTTP Github mirror of the recipe published there,
 containing a full list of the software dependencies needed to run the
 tools is hosted on
-[evm-chains-info-ur](
+[encoding-tools-ur](
   https://github.com/themartiancompany/encoding-tools-ur).
 Be aware the mirror could go offline any time as Github and more
 in general all HTTP resources are inherently unstable and censorable.
