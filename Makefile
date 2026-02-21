@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 #    ----------------------------------------------------------------------
-#    Copyright © 2024, 2025  Pellegrino Prevete
+#    Copyright © 2024, 2025, 2026  Pellegrino Prevete
 #
 #    All rights reserved
 #    ----------------------------------------------------------------------
@@ -29,31 +29,79 @@ MAN_DIR?=$(DESTDIR)$(PREFIX)/share/man
 DOC_FILES=\
   $(wildcard *.rst) \
   $(wildcard *.md)
-SCRIPT_FILES=$(wildcard $(_PROJECT)/*)
+
+SCRIPT_FILES=$(wildcard $(_PROJECT)/bash/*)
+
+_INSTALL_FILE=\
+  install \
+    -vDm644
+_INSTALL_EXE=\
+  install \
+    -vDm755
+_INSTALL_DIR=\
+  install \
+    -vdm755
 
 all:
 
 check: shellcheck
 
 shellcheck:
-	shellcheck -s bash $(SCRIPT_FILES)
+
+	shellcheck \
+	  -s \
+	    "bash" \
+	  $(SCRIPT_FILES)
 
 install: install-scripts install-doc install-man
 
+build-npm:
+
+	make \
+	  build-man
+	cp \
+	  -r \
+	  $(NPM_FILES) \
+	  "build"; \
+	cd \
+	  "build"; \
+	_version="$$( \
+	  npm \
+	    view \
+	      "$$(pwd)" \
+	      "version")"; \
+	npm \
+	  install; \
+	npm \
+	  run \
+	    "build"; \
+	npm \
+	  pack; \
+	mv \
+	  "$(_PROJECT)-$${_version}.tgz" \
+	  ".."
+
 install-doc:
 
-	install -vDm 644 $(DOC_FILES) -t $(DOC_DIR)
+	$(INSTALL_FILE) \
+	  $(DOC_FILES) \
+	  -t \
+	  $(DOC_DIR)
 
 install-scripts:
 
-	install -vdm 755 "$(BIN_DIR)"
-	install -vDm 755 $(_PROJECT)/bin2txt "$(BIN_DIR)"
-	install -vDm 755 $(_PROJECT)/txt2bin "$(BIN_DIR)"
+	$(_INSTALL_DIR) \
+	  "$(BIN_DIR)"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/bash/bin2txt" \
+	  "$(BIN_DIR)"
+	$(_INSTALL_EXE) \
+	  "$(_PROJECT)/txt2bin" \
+	  "$(BIN_DIR)"
 
 install-man:
 
-	install \
-	  -vdm755 \
+	$(INSTALL_DIR) \
 	  "$(MAN_DIR)/man1"
 	rst2man \
 	  "man/bin2txt.1.rst" \
@@ -62,5 +110,4 @@ install-man:
 	  "man/txt2bin.1.rst" \
 	  "$(MAN_DIR)/man1/txt2bin.1"
 
-
-.PHONY: check install install-doc install-man install-scripts shellcheck
+.PHONY: check build-npm install install-doc install-man install-scripts shellcheck

@@ -66,6 +66,8 @@
   "dependencies": {
     "crash-js":
       "^0.1.51",
+    "tmcsplit":
+      "^0.0.2",
     "yargs":
       "18.0.0"
   },
