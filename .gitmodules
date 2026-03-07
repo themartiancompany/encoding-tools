@@ -1,3 +1,6 @@
 [submodule "man"]
 	path = man
 	url = https://github.com/themartiancompany/encoding-tools-man
+[submodule "encoding-tools/nodejs"]
+	path = encoding-tools/nodejs
+	url = https://github.com/themartiancompany/encoding-tools.js
