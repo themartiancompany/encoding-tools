@@ -22,13 +22,12 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-_bin="$( \
+_bin="$(
   dirname \
-    "$( \
-      command \
-        -v \
-        "env")")"
-_lib="$( \
+    "$(command \
+         -v \
+         "env")")"
+_lib="$(
   realpath \
     "${_bin}/../lib")"
 _crash_bash="${_lib}/libcrash-bash/crash-bash"
@@ -194,7 +193,7 @@ _buffer_prepare() {
     _in_size_bytes \
     _split_opts=() \
     _msg=()
-  _in_size_bytes="$( \
+  _in_size_bytes="$(
     du \
       -bs \
       "${_in}" | \
@@ -321,6 +320,16 @@ _bin2txt() {
 # Set defaults and, if present, overrides
 # from arch-grub command line option parameters
 _set_overrides() {
+  if [[ -v override_color ]]; then
+    color="${override_color}"
+  elif [[ -z "${color}" ]]; then
+    color="n"
+  fi
+  if [[ -v override_quiet ]]; then
+    quiet="${override_quiet}"
+  elif [[ -z "${quiet}" ]]; then
+    quiet="y"
+  fi
   _set_override \
     "make" \
     "date" \
@@ -349,16 +358,6 @@ _set_overrides() {
     "amount" \
     "only" \
     "n"
-  if [[ -v override_color ]]; then
-    color="${override_color}"
-  elif [[ -z "${color}" ]]; then
-    color="n"
-  fi
-  if [[ -v override_quiet ]]; then
-    quiet="${override_quiet}"
-  elif [[ -z "${quiet}" ]]; then
-    quiet="y"
-  fi
 }
 
 # Shows configuration options.
@@ -446,29 +445,27 @@ while \
   esac
 done
 shift \
-  $(( \
+  $((
     OPTIND - 1 \
   ))
 _set_overrides
 _required_args=2
-if [[ "$(_get "amount" "only")" == "y" ]]; then
+if [[ "${amount_only}" == "y" ]]; then
   _required_args=1
 fi
-(( $# < "${_required_args}" )) && \
+if (( $# < "${_required_args}" )); then
+  _msg=(
+    "Missing arguments."
+  )
   _msg_error \
-    "missing arguments" \
-    0 && \
+    "${_msg[*]}" \
+    0
   _usage \
     1
-_set \
-  "in" \
-  "file" \
-  "${1}"
+fi
+in_file="${1}"
 if (( 1 < $# )); then
-  _set \
-    "out" \
-    "txt" \
-    "${2}"
+  out_txt="${2}"
 fi
 _show_config
 app_opts=(

@@ -72,7 +72,7 @@
   },
   "dependencies": {
     "crash-js":
-      "^0.1.51",
+      "^0.1.74",
     "tmcsplit":
       "^0.0.2",
     "yargs":
@@ -82,6 +82,9 @@
     "commonjs",
   "main":
     "encoding-tools",
+  "bin":
+    { "bin2txt.js":
+        "bin2txt" },
   "scripts": {
     "build":
       "cd ../.. && make build-npm && encoding-tools/nodejs",

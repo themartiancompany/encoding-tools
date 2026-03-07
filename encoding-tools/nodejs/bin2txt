@@ -29,19 +29,33 @@ const
   _libcrash =
   require(
     'crash-js');
+/* global
+     _cmdline_check */
 const
   _cmdline_check =
     _libcrash._cmdline_check;
+/* global
+     _msg_info */
 const
   _msg_info =
     _libcrash._msg_info;
+/* global
+     _msg_error */
 const
   _msg_error =
     _libcrash._msg_error;
+/* global
+     _argv_get */
+const
+_argv_get =
+  _libcrash._argv_get;
+
 const
   _encoding_tools =
     require(
       "./encoding-tools");
+/* global
+     _bin2txt */
 _bin2txt =
   _encoding_tools._bin2txt;
 
@@ -81,6 +95,11 @@ function
        out_txt_prefix:
          writable */
   out_txt_prefix =
+    "";
+  /* global
+       amount_only:
+         writable */
+  amount_only =
     "";
   /* global
        quiet:
@@ -170,7 +189,7 @@ function
     "     -v --verbose                    Enable verbose output."
   ];
   for ( _line of _text ) {
-    _msg_info(
+    console.log(
       _line);
   }
   process.exit(
@@ -181,25 +200,29 @@ function
   _cmdline_parse() {
   let
     _argv,
+    _help_display,
     _msg;
   _argv =
-    _yargv_get();
+    _argv_get();
   quiet = 
     "y";
   runtime_environment =
     "node";
-  help_display =
-    _argv[
-      "help"] ||
-    _argv[
-      "h"];
-  if ( help_display ) {
+  if ( "help" in _argv ||
+       "h" in _argv) {
+    _help_display =
+      true;
+  }
+  if ( _help_display ) {
     quiet =
       "n";
     _usage(
       0);
   }
-  if ( _argv[
+  console.log(_argv);
+  if ( typeof(
+         _argv) == "undefined" ||
+       _argv[
          "_"].length < 1 ) {
     _msg =
       "Input file argument required.";
@@ -216,7 +239,8 @@ function
   if ( _argv[
          "_"].length < 2 ) {
     out_txt_prefix =
-      in_file + ".base64"
+      in_file +
+      ".base64";
   }
   if ( "s" in _argv ) {
     string_length =
@@ -271,11 +295,8 @@ function
 
 _global_variables();
 if ( _cmdline_check(
-       "bin2txt") == true ) {
+       "bin2txt.js") == true ) {
   _cmdline_parse();
-}
-else {
-  _url_parse();
 }
 _config_show();
 app_opts = [
