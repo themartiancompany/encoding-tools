@@ -96,7 +96,7 @@ install-scripts:
 	  "$(_PROJECT)/bash/bin2txt" \
 	  "$(BIN_DIR)"
 	$(_INSTALL_EXE) \
-	  "$(_PROJECT)/txt2bin" \
+	  "$(_PROJECT)/bash/txt2bin" \
 	  "$(BIN_DIR)"
 
 install-man:
