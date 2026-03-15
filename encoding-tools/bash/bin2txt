@@ -123,12 +123,12 @@ _chunk_split() {
       elif [[ "${_block_last}" == "false" ]]; then
         _msg=(
           "Last chunk of non-last block,"
-	  "adding a newline character at the end."
-	)
-	_msg_info \
+          "adding a newline character at the end."
+        )
+        _msg_info \
           "${_msg[*]}"
         printf \
-	  "%s\n" \
+          "%s\n" \
           "${_cut}" > \
           "${_out}"
       fi
@@ -175,8 +175,8 @@ _blocks_find() {
     <(find \
         "${_pattern}"* \
         "${_find_opts[@]}" 2>/dev/null | \
-	sort \
-	  -V || \
+        sort \
+          -V || \
       true)
   for _block in "${_blocks_dirty[@]}"; do
     _blocks+=(
@@ -284,7 +284,7 @@ _bin2txt() {
     "${_blocks[@]}"; do
     _msg=(
       "Reading block '${_block}'"
-      "('${_block_current}'" 
+      "('${_block_current}'"
       "of '${_blocks_total}')."
     )
     _msg_info \
