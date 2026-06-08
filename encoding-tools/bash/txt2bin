@@ -102,8 +102,11 @@ _assemble() {
       "${_data}" >> \
       "${_out}"
   done
-  _msg_info \
+  _msg=(
     "Merging finished."
+  )
+  _msg_info \
+    "${_msg[*]}"
 }
 
 _base64_decode() {
@@ -166,7 +169,7 @@ _txt2bin() {
     _list="${_in[0]}"
     _in=( $(
       cat \
-        "${_in[0]}")
+        "${_list}")
     )
   fi
   "_${_format}_decode" \
@@ -232,11 +235,11 @@ Converts text to binary.
 Usage:
   ${app_name}
     [options]
-    <out_file>
-    [in_text]
+    <out-file>
+    [in-text]
 
   options:
-     -t <argument_type>   Possible values are 'file' and
+     -t <argument-type>   Possible values are 'file' and
                           'list'.
                           When it is 'file' the arguments
 			  are the encoded file paths,
@@ -244,11 +247,12 @@ Usage:
                           a file containing the paths of the
                           encoded files.
                           Default: '${argument_type}'
-     -f <encoding_format> Encoding format ('base64').
+     -f <encoding-format> Encoding format ('base64').
                           Default: '${encoding_format}'
 
      -h                   This message.
      -v                   Enable verbose output
+
 ENDUSAGETEXT
   _printf \
     '%s\n' \
@@ -268,21 +272,28 @@ while \
     arg; do
   case \
     "${arg}" in
-    t) override_argument_type="${OPTARG}" ;;
-    f) override_encoding_format="${OPTARG}" ;;
-    c) override_color="y" ;;
-    v) override_quiet="n" ;;
-    h|?) _set_overrides && \
-	 _usage \
-           0 ;;
+    t)
+      override_argument_type="${OPTARG}" ;;
+    f)
+      override_encoding_format="${OPTARG}" ;;
+    c)
+      override_color="y" ;;
+    v)
+      override_quiet="n" ;;
+    h|?)
+      _set_overrides
+      _usage \
+        0 ;;
     *)
-    _msg_error \
-      "Invalid argument '${arg}'." \
-      0 && \
-    _set_overrides && \
-    _usage \
-      1
-    ;;
+      _msg=(
+        "Invalid argument '${arg}'."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        0
+      _set_overrides
+      _usage \
+        1 ;;
   esac
 done
 shift \
